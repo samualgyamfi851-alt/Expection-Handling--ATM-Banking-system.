@@ -1,0 +1,120 @@
+"""
+ATM Banking System
+Custom exception handling with BankAccount class
+"""
+
+
+class InsufficientFundsError(Exception):
+    """Raised when a withdrawal amount exceeds the available balance."""
+
+    def __init__(self, balance, amount):
+        self.balance = balance
+        self.amount = amount
+        self.message = (
+            f"Withdrawal of GHS {amount:.2f} denied. "
+            f"Available balance: GHS {balance:.2f}."
+        )
+        super().__init__(self.message)
+
+
+class BankAccount:
+    """Represents a bank account with deposit, withdrawal, and balance check."""
+
+    def __init__(self, account_holder, initial_balance=0.0):
+        self.account_holder = account_holder
+        self._balance = initial_balance
+
+    def deposit(self, amount):
+        """
+        Deposit funds into the account.
+
+        Args:
+            amount (float): Amount to deposit. Must be positive.
+
+        Raises:
+            ValueError: If amount is negative or zero.
+        """
+        if amount <= 0:
+            raise ValueError(
+                f"Invalid deposit amount: GHS {amount:.2f}. "
+                "Deposit must be greater than zero."
+            )
+        self._balance += amount
+        print(f"Deposit successful. GHS {amount:.2f} added to your account.")
+        print(f"New balance: GHS {self._balance:.2f}")
+
+    def withdraw(self, amount):
+        """
+        Withdraw funds from the account.
+
+        Args:
+            amount (float): Amount to withdraw. Must be positive and <= balance.
+
+        Raises:
+            ValueError: If amount is negative or zero.
+            InsufficientFundsError: If amount exceeds available balance.
+        """
+        if amount <= 0:
+            raise ValueError(
+                f"Invalid withdrawal amount: GHS {amount:.2f}. "
+                "Withdrawal must be greater than zero."
+            )
+        if amount > self._balance:
+            raise InsufficientFundsError(self._balance, amount)
+
+        self._balance -= amount
+        print(f"Withdrawal successful. GHS {amount:.2f} dispensed.")
+        print(f"Remaining balance: GHS {self._balance:.2f}")
+
+    def check_balance(self):
+        """Display the current account balance."""
+        print(f"Account Holder: {self.account_holder}")
+        print(f"Current Balance: GHS {self._balance:.2f}")
+        return self._balance
+
+
+def atm_menu(account):
+    """Run the ATM CLI session for a given BankAccount."""
+    print("\n" + "=" * 40)
+    print("   Welcome to UMaT Community Bank ATM")
+    print("=" * 40)
+
+    while True:
+        print("\nSelect an option:")
+        print("  1. Deposit")
+        print("  2. Withdraw")
+        print("  3. Check Balance")
+        print("  4. Exit")
+
+        choice = input("\nEnter choice (1-4): ").strip()
+
+        if choice == "1":
+            try:
+                amount = float(input("Enter deposit amount (GHS): "))
+                account.deposit(amount)
+            except ValueError as e:
+                print(f"Error: {e}")
+
+        elif choice == "2":
+            try:
+                amount = float(input("Enter withdrawal amount (GHS): "))
+                account.withdraw(amount)
+            except InsufficientFundsError as e:
+                print(f"Transaction Failed: {e}")
+            except ValueError as e:
+                print(f"Error: {e}")
+
+        elif choice == "3":
+            account.check_balance()
+
+        elif choice == "4":
+            print("\nThank you for banking with us. Goodbye!")
+            break
+
+        else:
+            print("Invalid option. Please enter a number between 1 and 4.")
+
+
+if __name__ == "__main__":
+    account = BankAccount(account_holder="Samuel Ato Mensah", initial_balance=500.00)
+    atm_menu(account)
